@@ -8,6 +8,7 @@ import { SimyoFetcherConfig } from "./Fetchers/Simyo/types.js";
 
 // Retrieve user config
 const config = await ConfigManager.get();
+const DRY_RUN = process.argv.includes("--dry-run");
 
 // Run all supplied fetchers
 for (const fetcher of config.fetchers) {
@@ -20,7 +21,7 @@ for (const fetcher of config.fetchers) {
     }
 
     // Execute
-    await fetcherClass.execute();
+    await fetcherClass.execute(DRY_RUN);
 }
 
 /**

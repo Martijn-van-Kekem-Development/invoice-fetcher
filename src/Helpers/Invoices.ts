@@ -27,6 +27,8 @@ export class Invoices {
             fs.access(this.FILE_PATH, R_OK).then(async () => {
                 const data = await fs.readFile(this.FILE_PATH, "utf8");
                 this.json = JSON.parse(data) as Record<string, string[]>;
+            }).catch(() => {
+                console.warn(`${this.FILE_PATH} does not yet exist.`);
             });
         }
 
