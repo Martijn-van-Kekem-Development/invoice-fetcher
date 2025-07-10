@@ -26,6 +26,8 @@ export abstract class Fetcher {
             this.log("error", "Pre-validation failed. Not executing this fetcher.");
         }
 
+        let sentInvoices = 0;
+
         const invoices = await this.getInvoices();
         for (let invoice of invoices) {
             if (await Invoices.checkIsFetched(this.config.id, invoice.id)) continue;
@@ -34,8 +36,13 @@ export abstract class Fetcher {
             if (buffer) {
                 await Email.send(buffer, this.config, invoice);
                 await Invoices.markAsFetched(this.config.id, invoice.id);
+                sentInvoices++;
             }
         }
+
+        // Log that we're finished.
+        this.log("info", `Sent ${sentInvoices} invoices (${
+            invoices.length - sentInvoices} duplicates skipped).`);
     }
 
     /**
