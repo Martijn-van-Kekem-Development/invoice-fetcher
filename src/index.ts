@@ -1,7 +1,10 @@
-import { ConfigManager, FetcherConfig, SimyoFetcherConfig } from "./Helpers/ConfigManager.js";
+import { ConfigManager, FetcherConfig } from "./Helpers/ConfigManager.js";
 import { Invoices } from "./Helpers/Invoices.js";
 import { Fetcher } from "./Fetchers/Fetcher.js";
 import { SimyoFetcher } from "./Fetchers/Simyo/SimyoFetcher.js";
+import { OVHFetcher } from "./Fetchers/OVH/OVHFetcher.js";
+import { OVHFetcherConfig } from "./Fetchers/OVH/types.js";
+import { SimyoFetcherConfig } from "./Fetchers/Simyo/types.js";
 
 // Retrieve user config
 const config = await ConfigManager.get();
@@ -27,6 +30,8 @@ for (const fetcher of config.fetchers) {
 function createFetcher(config: FetcherConfig): Fetcher | null {
     if (config.type === "simyo")
         return new SimyoFetcher(config as SimyoFetcherConfig);
+    if (config.type === "ovh")
+        return new OVHFetcher(config as OVHFetcherConfig);
 
     return null;
 }

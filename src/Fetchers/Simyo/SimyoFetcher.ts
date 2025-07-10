@@ -1,7 +1,7 @@
 import { Fetcher } from "../Fetcher.js";
 import { Invoice } from "../Invoice.js";
-import { SimyoFetcherConfig } from "../../Helpers/ConfigManager.js";
 import { SimyoAPI } from "./SimyoAPI.js";
+import { SimyoFetcherConfig, SimyoInvoice } from "./types.js";
 
 export class SimyoFetcher extends Fetcher {
     /**
@@ -9,6 +9,12 @@ export class SimyoFetcher extends Fetcher {
      * @protected
      */
     protected config: SimyoFetcherConfig;
+
+    /**
+     * The fetched invoices.
+     * @private
+     */
+    private invoices: Map<string, SimyoInvoice> = new Map<string, SimyoInvoice>();
 
     /**
      * Constructor for Fetcher.
@@ -30,30 +36,42 @@ export class SimyoFetcher extends Fetcher {
     /**
      * @override
      */
-    public async getInvoices(): Promise<Array<Invoice>> {
+    public async getInvoiceIDs(): Promise<string[]> {
         if (!await this.authenticate()) return [];
 
         const invoices = await SimyoAPI.getInvoices();
-        const availableInvoices = invoices.filter(e => !e.concept);
+        if (!invoices) {
+            this.log("error", "Couldn't retrieve invoices. Exiting...");
+            return [];
+        }
 
-        return availableInvoices.map(item => ({
-            id: item.invoiceNumber,
-            total: item.total,
-            date: new Date(item.date),
-        } as Invoice));
+        for (const invoice of invoices) {
+            if (invoice.concept) continue;
+            this.invoices.set(invoice.invoiceNumber, invoice);
+        }
+
+        // Return array of ID's
+        return Array.from(this.invoices.keys());
     }
 
     /**
      * @override
      */
-    public async fetchInvoice(invoice: Invoice): Promise<Buffer | null> {
-        const result = await SimyoAPI.getInvoiceBuffer(invoice.id);
+    public async fetchInvoice(id: string): Promise<Invoice | null> {
+        if (!this.invoices.has(id)) return null;
+
+        const result = await SimyoAPI.getInvoiceBuffer(id);
         if (!result) {
-            this.log("error", `Couldn't fetch invoice ${invoice.id}. Skipping.`);
+            this.log("error", `Couldn't fetch invoice ${id}. Skipping.`);
             return null;
         }
 
-        return result;
+        return {
+            id: this.invoices.get(id)!.invoiceNumber,
+            total: this.invoices.get(id)!.total,
+            date: new Date(this.invoices.get(id)!.date),
+            content: result,
+        } as Invoice;
     }
 
     /**

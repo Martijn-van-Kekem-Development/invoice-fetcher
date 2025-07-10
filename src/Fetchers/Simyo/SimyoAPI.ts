@@ -53,7 +53,7 @@ export class SimyoAPI {
     /**
      * Get the invoices from the API
      */
-    public static async getInvoices(): Promise<Array<SimyoInvoice>> {
+    public static async getInvoices(): Promise<SimyoInvoice[] | null> {
         const result = await fetch("https://mijn.simyo.nl/api/get?endpoint=listAllPostpaid", {
             "headers": {
                 "cookie": `__Host-sessionKey=${SimyoAPI.authToken}`
@@ -66,8 +66,7 @@ export class SimyoAPI {
         });
 
         if (result.status !== 200) {
-            console.error("[ERROR] Failed to fetch invoices.");
-            return [];
+            return null;
         }
 
         const json = await result.json();
@@ -93,9 +92,6 @@ export class SimyoAPI {
         });
 
         if (result.status !== 200) {
-            console.error("[ERROR] Failed to download invoice.",
-                await result.text());
-
             return null;
         }
 

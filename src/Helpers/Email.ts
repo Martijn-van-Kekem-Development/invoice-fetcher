@@ -20,13 +20,11 @@ export class Email {
 
     /**
      * Send an e-mail
-     * @param fileBuffer The buffer with the invoice.
-     * @param fetcher The configuration for the fetcher that sent this email.
      * @param invoice The invoice data.
+     * @param fetcher The configuration for the fetcher that sent this email.
      */
-    public static async send(fileBuffer: Buffer,
-                             fetcher: FetcherConfig,
-                             invoice: Invoice) {
+    public static async send(invoice: Invoice,
+                             fetcher: FetcherConfig) {
         const transport = await this.init();
 
         const date = new Date(invoice.date);
@@ -38,7 +36,7 @@ export class Email {
             to: this.config.email.to,
             attachments: [{
                 filename: `${invoice.id}.pdf`,
-                content: fileBuffer
+                content: invoice.content
             }],
             subject: `${fetcher.friendly}: invoice received`,
             text: `An invoice has been issued by ${

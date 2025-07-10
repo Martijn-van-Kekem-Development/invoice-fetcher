@@ -31,7 +31,7 @@ export class ConfigManager {
 
 export interface Config {
     email: EmailConfig,
-    fetchers: Array<SimyoFetcherConfig>
+    fetchers: Array<FetcherConfig>
 }
 
 export interface EmailConfig {
@@ -44,10 +44,4 @@ export interface FetcherConfig {
     id: string,
     type: string,
     friendly: string
-}
-
-export interface SimyoFetcherConfig extends FetcherConfig {
-    type: "simyo",
-    phone: string,
-    password: string,
 }

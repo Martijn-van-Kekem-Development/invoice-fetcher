@@ -28,14 +28,14 @@ export abstract class Fetcher {
 
         let sentInvoices = 0;
 
-        const invoices = await this.getInvoices();
-        for (const invoice of invoices) {
-            if (await Invoices.checkIsFetched(this.config.id, invoice.id)) continue;
+        const invoices = await this.getInvoiceIDs();
+        for (const invoiceID of invoices) {
+            if (await Invoices.checkIsFetched(this.config.id, invoiceID)) continue;
 
-            const buffer = await this.fetchInvoice(invoice);
-            if (buffer) {
-                await Email.send(buffer, this.config, invoice);
-                await Invoices.markAsFetched(this.config.id, invoice.id);
+            const invoice = await this.fetchInvoice(invoiceID);
+            if (invoice) {
+                await Email.send(invoice, this.config);
+                await Invoices.markAsFetched(this.config.id, invoiceID);
                 sentInvoices++;
             }
         }
@@ -63,11 +63,11 @@ export abstract class Fetcher {
     /**
      * Get the available invoices.
      */
-    protected abstract getInvoices(): Promise<Array<Invoice>>;
+    protected abstract getInvoiceIDs(): Promise<string[]>;
 
     /**
      * Fetch the invoice to a buffer.
-     * @param invoice The invoice to fetch.
+     * @param id The invoice ID to fetch.
      */
-    protected abstract fetchInvoice(invoice: Invoice): Promise<Buffer | null>;
+    protected abstract fetchInvoice(id: string): Promise<Invoice | null>;
 }
