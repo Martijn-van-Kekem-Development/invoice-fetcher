@@ -1,64 +1,35 @@
-import {API} from "./API.js";
-import dotenv from "dotenv";
-import {Invoices, SimyoInvoice} from "./Invoices.js";
-import {Email} from "./Email.js";
+import {ConfigManager, FetcherConfig, SimyoFetcherConfig} from "./Helpers/ConfigManager.js";
+import {Invoices} from "./Helpers/Invoices.js";
+import {Fetcher} from "./Fetchers/Fetcher.js";
+import {SimyoFetcher} from "./Fetchers/Simyo/SimyoFetcher.js";
 
-// Prepare environment variables
-dotenv.config();
+// Retrieve user config
+const config = await ConfigManager.get();
 
-const phoneNumber = process.env.SIMYO_PHONE;
-const password = process.env.SIMYO_PASS;
+// Run all supplied fetchers
+for (let fetcher of config.fetchers) {
+    const fetcherClass = createFetcher(fetcher);
 
-// Check credentials
-if (!phoneNumber || !password) {
-    console.error("[ERROR] Required environment variables are not set. See .example.env");
-    process.exit(1);
-}
-
-// Get auth token
-console.info("[INFO] Authenticating...");
-const loginSuccess = await API.getAuthToken(
-    process.env.SIMYO_PHONE ?? "",
-    process.env.SIMYO_PASS ?? "");
-
-// Check for login failure
-if (!loginSuccess) {
-    console.error("[ERROR] Failed to authenticate. Check your credentials.");
-    process.exit(1);
-}
-
-// Fetch invoices
-console.info("[INFO] Login successful.");
-console.info("[INFO] Fetching invoices.");
-await findInvoiceToDownload();
-console.info("[INFO] Finished.")
-
-/**
- * Find whether there are invoices to download.
- */
-async function findInvoiceToDownload() {
-    const invoices = await API.getInvoices();
-    const availableInvoices = invoices.filter(e => !e.concept);
-    for (let invoice of availableInvoices) {
-        if (!await Invoices.checkIsFetched(invoice.invoiceNumber)) {
-            // Invoice needs to be fetched.
-            console.info("[INFO] Found new invoice: ", invoice.invoiceNumber);
-            await fetchInvoice(invoice);
-        }
+    // Invalid fetcher check
+    if (!fetcherClass) {
+        console.error("Invalid fetcher type specified", fetcher.id);
+        continue;
     }
+
+    // Execute
+    await fetcherClass.execute();
 }
 
 /**
- * Fetch the given invoice.
- * @param invoice The invoice
+ * Create a new fetcher class by the supplied id.
+ * @param config The fetcher configuration
  */
-async function fetchInvoice(invoice: SimyoInvoice) {
-    const buffer = await API.getInvoiceBuffer(invoice.invoiceNumber);
-    if (!buffer) {
-        console.error("[ERROR] Invoice buffer not found. Not sending e-mail.");
-        process.exit(1);
-    }
+function createFetcher(config: FetcherConfig): Fetcher | null {
+    if (config.type === "simyo")
+        return new SimyoFetcher(config as SimyoFetcherConfig);
 
-    await Email.send(buffer, invoice);
-    await Invoices.markAsFetched(invoice.invoiceNumber);
+    return null;
 }
+
+// Save sent invoices to disk.
+await Invoices.saveToDisk();

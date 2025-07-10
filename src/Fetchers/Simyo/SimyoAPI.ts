@@ -1,6 +1,6 @@
-import {SimyoInvoice} from "./Invoices.js";
+import {SimyoInvoice} from "./types.js";
 
-export class API {
+export class SimyoAPI {
     /**
      * The auth token for the user.
      * @private
@@ -13,7 +13,7 @@ export class API {
      * @param pass The password to log in with.
      * @private
      */
-    public static async getAuthToken(phone: string, pass: string): Promise<boolean> {
+    public static async authenticate(phone: string, pass: string): Promise<boolean> {
         const body = JSON.stringify({
             phoneNumber: phone,
             password: pass,
@@ -41,10 +41,10 @@ export class API {
             if (!cookieString.startsWith("__Host-sessionKey=")) continue;
 
             const parts = cookieString.split(";");
-            API.authToken = parts[0].split("=")[1];
+            SimyoAPI.authToken = parts[0].split("=")[1];
 
             // Return whether result was successful.
-            return (API.authToken ?? "").length > 0;
+            return (SimyoAPI.authToken ?? "").length > 0;
         }
 
         return false;
@@ -56,7 +56,7 @@ export class API {
     public static async getInvoices(): Promise<Array<SimyoInvoice>> {
         const result = await fetch("https://mijn.simyo.nl/api/get?endpoint=listAllPostpaid", {
             "headers": {
-                "cookie": `__Host-sessionKey=${API.authToken}`
+                "cookie": `__Host-sessionKey=${SimyoAPI.authToken}`
             },
             "referrer": "https://mijn.simyo.nl/facturen",
             "body": null,
@@ -81,7 +81,7 @@ export class API {
     public static async getInvoiceBuffer(id: string): Promise<Buffer | null> {
         const result = await fetch(`https://mijn.simyo.nl/api/get?endpoint=downloadPostpaidPdf&args=${id}`, {
             "headers": {
-                "cookie": `__Host-sessionKey=${API.authToken}`
+                "cookie": `__Host-sessionKey=${SimyoAPI.authToken}`
             },
             "body": null,
             "method": "GET",

@@ -1,0 +1,24 @@
+{
+  "email": {
+    "from": "Name <email@address.com>",
+    "to": "Name <email@address.com>",
+    "smtp": {
+      "port": 587,
+      "host": "",
+      "secure": false,
+      "auth": {
+        "user": "",
+        "pass": ""
+      }
+    }
+  },
+  "fetchers": [
+    {
+      "id": "simyo_1",
+      "type": "simyo",
+      "friendly": "Simyo",
+      "phone": "0612345678",
+      "password": ""
+    }
+  ]
+}
