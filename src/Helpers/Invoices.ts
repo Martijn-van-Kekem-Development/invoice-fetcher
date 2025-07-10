@@ -13,9 +13,11 @@ export class Invoices {
      * @param force Whether to force-pull the invoices from disk.
      * @private
      */
-    private static async getFetchedInvoices(fetcherID: string, force: boolean = false): Promise<string[]> {
+    private static async getFetchedInvoices(
+        fetcherID: string, force: boolean = false): Promise<string[]> {
+
         if (this.json === null || force) {
-            const data = await fs.readFile('data/fetched_invoices.json', 'utf8');
+            const data = await fs.readFile("data/fetched_invoices.json", "utf8");
             this.json = JSON.parse(data) as Record<string, string[]>;
         }
 
@@ -27,7 +29,7 @@ export class Invoices {
      */
     public static async saveToDisk() {
         if (this.json === null) return;
-        await fs.writeFile('data/fetched_invoices.json', JSON.stringify(this.json));
+        await fs.writeFile("data/fetched_invoices.json", JSON.stringify(this.json));
         this.json = null;
     }
 
@@ -47,7 +49,9 @@ export class Invoices {
      * @param fetcherID The fetcher ID.
      * @param id The ID to check.
      */
-    public static async checkIsFetched(fetcherID: string, id: string): Promise<boolean> {
+    public static async checkIsFetched(
+        fetcherID: string, id: string): Promise<boolean> {
+
         const json = await this.getFetchedInvoices(fetcherID);
         return json.includes(id);
     }

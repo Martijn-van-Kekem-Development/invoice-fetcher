@@ -1,7 +1,7 @@
-import {Invoice} from "./Invoice.js";
-import {Invoices} from "../Helpers/Invoices.js";
-import {FetcherConfig} from "../Helpers/ConfigManager.js";
-import {Email} from "../Helpers/Email.js";
+import { Invoice } from "./Invoice.js";
+import { Invoices } from "../Helpers/Invoices.js";
+import { FetcherConfig } from "../Helpers/ConfigManager.js";
+import { Email } from "../Helpers/Email.js";
 
 export abstract class Fetcher {
     /**
@@ -29,7 +29,7 @@ export abstract class Fetcher {
         let sentInvoices = 0;
 
         const invoices = await this.getInvoices();
-        for (let invoice of invoices) {
+        for (const invoice of invoices) {
             if (await Invoices.checkIsFetched(this.config.id, invoice.id)) continue;
 
             const buffer = await this.fetchInvoice(invoice);
@@ -63,7 +63,7 @@ export abstract class Fetcher {
     /**
      * Get the available invoices.
      */
-    protected abstract getInvoices(): Promise<Array<Invoice>>
+    protected abstract getInvoices(): Promise<Array<Invoice>>;
 
     /**
      * Fetch the invoice to a buffer.

@@ -5,7 +5,10 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node --import=tsx src/index.ts"
+    "start": "node --import=tsx src/index.ts",
+    "check-lint": "eslint",
+    "check-ts": "tsc --noemit",
+    "check": "npm run check-lint && npm run check-ts"
   },
   "dependencies": {
     "nodemailer": "^7.0.5"
@@ -13,6 +16,11 @@
   "devDependencies": {
     "@types/node": "^24.0.12",
     "@types/nodemailer": "^6.4.17",
+    "typescript-eslint": "^8.1.0",
+    "eslint": "^9.9.0",
+    "globals": "^16.0.0",
+    "@eslint/js": "^9.9.0",
+    "@stylistic/eslint-plugin": "^5.1.0",
     "tsx": "^4.17.0"
   }
 }

@@ -1,4 +1,4 @@
-import {TransportOptions} from "nodemailer";
+import { TransportOptions } from "nodemailer";
 import * as fs from "node:fs/promises";
 
 export class ConfigManager {

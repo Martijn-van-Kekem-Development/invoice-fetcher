@@ -1,0 +1,29 @@
+name: Request a new feature
+description: Propose a new feature.
+title: "[FEATURE REQUEST]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Fill out this form in order to request a new feature.
+
+  - type: textarea
+    attributes:
+      label: Explain your feature.
+      description: Please explain what feature you're proposing to add.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Added value.
+      description: Please explain the added value of the feature you're proposing. Who is going to benefit from this and why?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional info
+      description: If there is any additional information that's important for us to know, please report it here.
+    validations:
+      required: false
