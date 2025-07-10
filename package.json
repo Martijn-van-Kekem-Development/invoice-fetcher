@@ -1,0 +1,19 @@
+{
+  "name": "simyo-invoices-fetcher",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node --import=tsx src/index.ts"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "nodemailer": "^7.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.12",
+    "@types/nodemailer": "^6.4.17",
+    "tsx": "^4.17.0"
+  }
+}
