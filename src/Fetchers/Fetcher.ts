@@ -21,23 +21,36 @@ export abstract class Fetcher {
     /**
      * Execute this fetcher.
      */
-    public async execute() {
+    public async execute(dryRun: boolean = false): Promise<void> {
         if (!await this.validate()) {
             this.log("error", "Pre-validation failed. Not executing this fetcher.");
         }
 
-        let sentInvoices = 0;
+        if (dryRun) {
+            this.log("warn", "DRY RUN: not sending e-mails.");
+        }
 
+        // Fetch invoices
+        let sentInvoices = 0;
         const invoices = await this.getInvoiceIDs();
+
+        // Do for every invoice ID
         for (const invoiceID of invoices) {
+            // Check whether it was already fetched
             if (await Invoices.checkIsFetched(this.config.id, invoiceID)) continue;
 
-            const invoice = await this.fetchInvoice(invoiceID);
-            if (invoice) {
+            if (!dryRun) {
+                // Not dry-running, so fetch document
+                const invoice = await this.fetchInvoice(invoiceID);
+                if (!invoice) continue; // Error, continue.
+
+                // Send e-mail with this document
                 await Email.send(invoice, this.config);
-                await Invoices.markAsFetched(this.config.id, invoiceID);
-                sentInvoices++;
             }
+
+            // Mark as fetched.
+            await Invoices.markAsFetched(this.config.id, invoiceID);
+            sentInvoices++;
         }
 
         // Log that we're finished.

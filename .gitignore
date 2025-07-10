@@ -8,7 +8,7 @@ yarn-error.log*
 /.pnp
 .pnp.js
 
-data/fetched_invoices.json
+fetched_invoices.json
 
 package-lock.json
 config.json

@@ -1,6 +1,13 @@
+import { R_OK } from "node:constants";
 import * as fs from "node:fs/promises";
 
 export class Invoices {
+    /**
+     * The file path for the save location
+     * @private
+     */
+    private static FILE_PATH: string = "fetched_invoices.json";
+
     /**
      * The retrieved data.
      * @private
@@ -17,9 +24,17 @@ export class Invoices {
         fetcherID: string, force: boolean = false): Promise<string[]> {
 
         if (this.json === null || force) {
-            const data = await fs.readFile("data/fetched_invoices.json", "utf8");
-            this.json = JSON.parse(data) as Record<string, string[]>;
+            fs.access(this.FILE_PATH, R_OK).then(async () => {
+                const data = await fs.readFile(this.FILE_PATH, "utf8");
+                this.json = JSON.parse(data) as Record<string, string[]>;
+            }).catch(() => {
+                console.warn(`${this.FILE_PATH} does not yet exist.`);
+            });
         }
+
+        // Not retrieved from disk, initialize as empty.
+        if (!this.json)
+            this.json = {};
 
         if (!Object.keys(this.json).includes(fetcherID)) {
             this.json[fetcherID] = [];
@@ -33,7 +48,7 @@ export class Invoices {
      */
     public static async saveToDisk() {
         if (this.json === null) return;
-        await fs.writeFile("data/fetched_invoices.json", JSON.stringify(this.json));
+        await fs.writeFile(this.FILE_PATH, JSON.stringify(this.json));
         this.json = null;
     }
 
