@@ -1,21 +1,21 @@
-import {createTransport, TransportOptions} from "nodemailer";
+import {createTransport} from "nodemailer";
 import {SimyoInvoice} from "./Invoices.js";
+import {Config, ConfigManager} from "./ConfigManager.js";
 
 export class Email {
+    /**
+     * The configuration.
+     * @private
+     */
+    private static config: Config;
+
     /**
      * Initialize the client
      * @private
      */
-    private static init() {
-        return createTransport({
-            port: process.env.SMTP_PORT ?? 0,
-            host: process.env.SMTP_HOST ?? "",
-            secure: false, // true for 465, false for other ports
-            auth: {
-                user: process.env.SMTP_USER ?? "",
-                pass: process.env.SMTP_PASS ?? ""
-            },
-        } as TransportOptions);
+    private static async init() {
+        this.config = await ConfigManager.get();
+        return createTransport(this.config.email.smtp);
     }
 
     /**
@@ -24,14 +24,14 @@ export class Email {
      * @param invoice The invoice data.
      */
     public static async send(fileBuffer: Buffer, invoice: SimyoInvoice) {
-        const transport = this.init();
+        const transport = await this.init();
 
         const date = new Date(invoice.date);
         const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
         await transport.sendMail({
-            from: process.env.MAIL_FROM ?? "",
-            to: process.env.MAIL_TO ?? "",
+            from: this.config.email.from,
+            to: this.config.email.to,
             attachments: [{
                 filename: `${invoice.invoiceNumber}.pdf`,
                 content: fileBuffer

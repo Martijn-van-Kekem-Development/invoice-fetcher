@@ -1,13 +1,12 @@
 import {API} from "./API.js";
-import dotenv from "dotenv";
 import {Invoices, SimyoInvoice} from "./Invoices.js";
 import {Email} from "./Email.js";
+import {ConfigManager} from "./ConfigManager.js";
 
-// Prepare environment variables
-dotenv.config();
+const config = await ConfigManager.get();
 
-const phoneNumber = process.env.SIMYO_PHONE;
-const password = process.env.SIMYO_PASS;
+const phoneNumber = config.fetchers[0].phone;
+const password = config.fetchers[0].password;
 
 // Check credentials
 if (!phoneNumber || !password) {
@@ -17,9 +16,7 @@ if (!phoneNumber || !password) {
 
 // Get auth token
 console.info("[INFO] Authenticating...");
-const loginSuccess = await API.getAuthToken(
-    process.env.SIMYO_PHONE ?? "",
-    process.env.SIMYO_PASS ?? "");
+const loginSuccess = await API.getAuthToken(phoneNumber, password);
 
 // Check for login failure
 if (!loginSuccess) {
