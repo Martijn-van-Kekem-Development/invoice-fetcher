@@ -24,7 +24,7 @@ export class Invoices {
         fetcherID: string, force: boolean = false): Promise<string[]> {
 
         if (this.json === null || force) {
-            fs.access(this.FILE_PATH, R_OK).then(async () => {
+            await fs.access(this.FILE_PATH, R_OK).then(async () => {
                 const data = await fs.readFile(this.FILE_PATH, "utf8");
                 this.json = JSON.parse(data) as Record<string, string[]>;
             }).catch(() => {
