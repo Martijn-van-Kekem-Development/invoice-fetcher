@@ -21,7 +21,11 @@ export class Invoices {
             this.json = JSON.parse(data) as Record<string, string[]>;
         }
 
-        return this.json[fetcherID] ?? [];
+        if (!Object.keys(this.json).includes(fetcherID)) {
+            this.json[fetcherID] = [];
+        }
+
+        return this.json[fetcherID];
     }
 
     /**
