@@ -1,7 +1,7 @@
-import {Fetcher} from "../Fetcher.js";
-import {Invoice} from "../Invoice.js";
-import {SimyoFetcherConfig} from "../../Helpers/ConfigManager.js";
-import {SimyoAPI} from "./SimyoAPI.js";
+import { Fetcher } from "../Fetcher.js";
+import { Invoice } from "../Invoice.js";
+import { SimyoFetcherConfig } from "../../Helpers/ConfigManager.js";
+import { SimyoAPI } from "./SimyoAPI.js";
 
 export class SimyoFetcher extends Fetcher {
     /**
@@ -24,7 +24,7 @@ export class SimyoFetcher extends Fetcher {
      */
     protected async validate(): Promise<boolean> {
         return (this.config.phone ?? "").length > 0 &&
-            (this.config.password ?? "").length > 0
+            (this.config.password ?? "").length > 0;
     }
 
     /**
@@ -61,7 +61,8 @@ export class SimyoFetcher extends Fetcher {
      * @private
      */
     private async authenticate(): Promise<boolean> {
-        const result = await SimyoAPI.authenticate(this.config.phone, this.config.password);
+        const result =
+            await SimyoAPI.authenticate(this.config.phone, this.config.password);
         if (!result) {
             this.log("error", "Authentication failed. Stopping this fetcher.");
         }

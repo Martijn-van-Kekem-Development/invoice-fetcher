@@ -1,4 +1,4 @@
-import {SimyoInvoice} from "./types.js";
+import { SimyoInvoice } from "./types.js";
 
 export class SimyoAPI {
     /**
@@ -18,7 +18,7 @@ export class SimyoAPI {
             phoneNumber: phone,
             password: pass,
             impersonatedPhoneNumber: ""
-        })
+        });
 
         const result = await fetch("https://mijn.simyo.nl/auth/login", {
             "headers": {
@@ -37,7 +37,7 @@ export class SimyoAPI {
 
         // Retrieve authentication cookie
         const cookies = result.headers.getSetCookie();
-        for (let cookieString of cookies) {
+        for (const cookieString of cookies) {
             if (!cookieString.startsWith("__Host-sessionKey=")) continue;
 
             const parts = cookieString.split(";");
@@ -79,7 +79,10 @@ export class SimyoAPI {
      * @param id
      */
     public static async getInvoiceBuffer(id: string): Promise<Buffer | null> {
-        const result = await fetch(`https://mijn.simyo.nl/api/get?endpoint=downloadPostpaidPdf&args=${id}`, {
+        const url = "https://mijn.simyo.nl/api/get"+
+            `?endpoint=downloadPostpaidPdf&args=${id}`;
+
+        const result = await fetch(url, {
             "headers": {
                 "cookie": `__Host-sessionKey=${SimyoAPI.authToken}`
             },
@@ -90,11 +93,13 @@ export class SimyoAPI {
         });
 
         if (result.status !== 200) {
-            console.error("[ERROR] Failed to download invoice.", await result.text());
+            console.error("[ERROR] Failed to download invoice.",
+                await result.text());
+
             return null;
         }
 
         const blob = await result.blob();
-        return Buffer.from(await blob.arrayBuffer())
+        return Buffer.from(await blob.arrayBuffer());
     }
 }

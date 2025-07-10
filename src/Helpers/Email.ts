@@ -1,6 +1,6 @@
-import {createTransport} from "nodemailer";
-import {Config, ConfigManager, FetcherConfig} from "./ConfigManager.js";
-import {Invoice} from "../Fetchers/Invoice.js";
+import { createTransport } from "nodemailer";
+import { Config, ConfigManager, FetcherConfig } from "./ConfigManager.js";
+import { Invoice } from "../Fetchers/Invoice.js";
 
 export class Email {
     /**
@@ -30,7 +30,8 @@ export class Email {
         const transport = await this.init();
 
         const date = new Date(invoice.date);
-        const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+        const dateStr =
+            `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
         await transport.sendMail({
             from: this.config.email.from,

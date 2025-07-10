@@ -1,13 +1,13 @@
-import {ConfigManager, FetcherConfig, SimyoFetcherConfig} from "./Helpers/ConfigManager.js";
-import {Invoices} from "./Helpers/Invoices.js";
-import {Fetcher} from "./Fetchers/Fetcher.js";
-import {SimyoFetcher} from "./Fetchers/Simyo/SimyoFetcher.js";
+import { ConfigManager, FetcherConfig, SimyoFetcherConfig } from "./Helpers/ConfigManager.js";
+import { Invoices } from "./Helpers/Invoices.js";
+import { Fetcher } from "./Fetchers/Fetcher.js";
+import { SimyoFetcher } from "./Fetchers/Simyo/SimyoFetcher.js";
 
 // Retrieve user config
 const config = await ConfigManager.get();
 
 // Run all supplied fetchers
-for (let fetcher of config.fetchers) {
+for (const fetcher of config.fetchers) {
     const fetcherClass = createFetcher(fetcher);
 
     // Invalid fetcher check
