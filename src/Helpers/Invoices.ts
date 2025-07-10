@@ -5,46 +5,50 @@ export class Invoices {
      * The retrieved data.
      * @private
      */
-    private static json: string[] | null = null;
+    private static json: Record<string, string[]> | null = null;
 
     /**
      * Get the fetched invoices from disk.
+     * @param fetcherID The fetcher ID.
+     * @param force Whether to force-pull the invoices from disk.
      * @private
      */
-    private static async getFetchedInvoices(force: boolean = false): Promise<string[]> {
+    private static async getFetchedInvoices(fetcherID: string, force: boolean = false): Promise<string[]> {
         if (this.json === null || force) {
             const data = await fs.readFile('data/fetched_invoices.json', 'utf8');
-            this.json = JSON.parse(data) as string[];
+            this.json = JSON.parse(data) as Record<string, string[]>;
         }
 
-        return this.json;
+        return this.json[fetcherID] ?? [];
     }
 
     /**
-     * Get the fetched invoices from disk.
-     * @private
+     * Save changes to the array to the disk.
      */
-    public static async markAsFetched(id: string): Promise<void> {
-        const json = await this.getFetchedInvoices();
-        json.push(id);
-        await fs.writeFile('data/fetched_invoices.json', JSON.stringify(json));
-
+    public static async saveToDisk() {
+        if (this.json === null) return;
+        await fs.writeFile('data/fetched_invoices.json', JSON.stringify(this.json));
         this.json = null;
     }
 
     /**
+     * Get the fetched invoices from disk.
+     * @param fetcherID The fetcher ID.
+     * @param id The ID to mark as fetched.
+     * @private
+     */
+    public static async markAsFetched(fetcherID: string, id: string): Promise<void> {
+        const json = await this.getFetchedInvoices(fetcherID);
+        json.push(id);
+    }
+
+    /**
      * Check whether an ID was already fetched.
+     * @param fetcherID The fetcher ID.
      * @param id The ID to check.
      */
-    public static async checkIsFetched(id: string): Promise<boolean> {
-        const json = await this.getFetchedInvoices();
+    public static async checkIsFetched(fetcherID: string, id: string): Promise<boolean> {
+        const json = await this.getFetchedInvoices(fetcherID);
         return json.includes(id);
     }
-}
-
-export interface SimyoInvoice {
-    invoiceNumber: string,
-    total: number,
-    date: string,
-    concept: boolean
 }

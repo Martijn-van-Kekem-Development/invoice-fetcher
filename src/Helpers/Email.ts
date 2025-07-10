@@ -1,6 +1,6 @@
 import {createTransport} from "nodemailer";
-import {SimyoInvoice} from "./Invoices.js";
-import {Config, ConfigManager} from "./ConfigManager.js";
+import {Config, ConfigManager, FetcherConfig} from "./ConfigManager.js";
+import {Invoice} from "../Fetchers/Invoice.js";
 
 export class Email {
     /**
@@ -21,9 +21,12 @@ export class Email {
     /**
      * Send an e-mail
      * @param fileBuffer The buffer with the invoice.
+     * @param fetcher The configuration for the fetcher that sent this email.
      * @param invoice The invoice data.
      */
-    public static async send(fileBuffer: Buffer, invoice: SimyoInvoice) {
+    public static async send(fileBuffer: Buffer,
+                             fetcher: FetcherConfig,
+                             invoice: Invoice) {
         const transport = await this.init();
 
         const date = new Date(invoice.date);
@@ -33,12 +36,13 @@ export class Email {
             from: this.config.email.from,
             to: this.config.email.to,
             attachments: [{
-                filename: `${invoice.invoiceNumber}.pdf`,
+                filename: `${invoice.id}.pdf`,
                 content: fileBuffer
             }],
-            subject: "Simyo: invoice received",
-            text: `An invoice has been issued by Simyo.\n\nInvoice ID: ${
-                invoice.invoiceNumber}\nInvoice date: ${
+            subject: `${fetcher.friendly}: invoice received`,
+            text: `An invoice has been issued by ${
+                fetcher.friendly}.\n\nInvoice ID: ${
+                invoice.id}\nInvoice date: ${
                 dateStr}\n\nAmount incl. VAT: ${invoice.total}`,
         });
     }

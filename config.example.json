@@ -14,7 +14,9 @@
   },
   "fetchers": [
     {
+      "id": "simyo_1",
       "type": "simyo",
+      "friendly": "Simyo",
       "phone": "0612345678",
       "password": ""
     }
