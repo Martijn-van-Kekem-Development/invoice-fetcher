@@ -5,7 +5,46 @@ export class SimyoAPI {
      * The auth token for the user.
      * @private
      */
-    private static authToken: string | null = null;
+    private static authCookies: Map<String, String> = new Map<String, String>();
+
+    /**
+     * Get the cookie string for the requests.
+     * @private
+     */
+    private static getCookieString(): string {
+        return Array.from(SimyoAPI.authCookies.entries())
+            .map(([key, val]) => `${key}=${val}`).join(";");
+    }
+
+    /**
+     * Update the cookies for the last request.
+     * @param result
+     * @private
+     */
+    private static updateCookies(result: Response) {
+        // Retrieve authentication cookie
+        const cookies = result.headers.getSetCookie();
+        for (const cookieString of cookies) {
+            const keyValuePart = cookieString.split(";")[0].split("=");
+            SimyoAPI.authCookies.set(keyValuePart[0], keyValuePart[1]);
+        }
+    }
+
+    /**
+     * Request a new session, required before authenticating.
+     */
+    private static async requestSession() {
+        const result = await fetch("https://mijn.simyo.nl/api/get?endpoint=getUsPs", {
+            "headers": {
+                "content-type": "application/json",
+            },
+            "method": "GET",
+            "mode": "cors",
+            "credentials": "include"
+        });
+
+        this.updateCookies(result);
+    }
 
     /**
      * Create a fetch request.
@@ -14,6 +53,8 @@ export class SimyoAPI {
      * @private
      */
     public static async authenticate(phone: string, pass: string): Promise<boolean> {
+        await this.requestSession();
+
         const body = JSON.stringify({
             phoneNumber: phone,
             password: pass,
@@ -35,19 +76,8 @@ export class SimyoAPI {
             return false;
         }
 
-        // Retrieve authentication cookie
-        const cookies = result.headers.getSetCookie();
-        for (const cookieString of cookies) {
-            if (!cookieString.startsWith("__Host-sessionKey=")) continue;
-
-            const parts = cookieString.split(";");
-            SimyoAPI.authToken = parts[0].split("=")[1];
-
-            // Return whether result was successful.
-            return (SimyoAPI.authToken ?? "").length > 0;
-        }
-
-        return false;
+        this.updateCookies(result);
+        return true;
     }
 
     /**
@@ -56,7 +86,7 @@ export class SimyoAPI {
     public static async getInvoices(): Promise<SimyoInvoice[] | null> {
         const result = await fetch("https://mijn.simyo.nl/api/get?endpoint=listAllPostpaid", {
             "headers": {
-                "cookie": `__Host-sessionKey=${SimyoAPI.authToken}`
+                "cookie": this.getCookieString()
             },
             "referrer": "https://mijn.simyo.nl/facturen",
             "body": null,
@@ -66,9 +96,11 @@ export class SimyoAPI {
         });
 
         if (result.status !== 200) {
+            console.log("getInvoices() error", await result.json());
             return null;
         }
 
+        this.updateCookies(result);
         const json = await result.json();
         return json.result;
     }
@@ -83,18 +115,21 @@ export class SimyoAPI {
 
         const result = await fetch(url, {
             "headers": {
-                "cookie": `__Host-sessionKey=${SimyoAPI.authToken}`
+                "cookie": this.getCookieString()
             },
             "body": null,
+            "referrer": "https://mijn.simyo.nl/facturen",
             "method": "GET",
             "mode": "cors",
             "credentials": "include"
         });
 
         if (result.status !== 200) {
+            console.log("getInvoiceBuffer() error", await result.json());
             return null;
         }
 
+        this.updateCookies(result);
         const blob = await result.blob();
         return Buffer.from(await blob.arrayBuffer());
     }
