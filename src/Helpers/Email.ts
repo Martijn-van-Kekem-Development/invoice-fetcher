@@ -19,12 +19,12 @@ export class Email {
     }
 
     /**
-     * Send an e-mail
+     * Send an invoice by e-mail
      * @param invoice The invoice data.
      * @param fetcher The configuration for the fetcher that sent this email.
      */
-    public static async send(invoice: Invoice,
-                             fetcher: FetcherConfig) {
+    public static async sendInvoice(invoice: Invoice,
+                                    fetcher: FetcherConfig) {
         const transport = await this.init();
 
         const date = new Date(invoice.date);
@@ -43,6 +43,25 @@ export class Email {
                 fetcher.friendly}.\n\nInvoice ID: ${
                 invoice.id}\nInvoice date: ${
                 dateStr}\n\nAmount incl. VAT: ${invoice.total}`,
+        });
+    }
+
+    /**
+     * Send a failure e-mail
+     * @param error The error message.
+     * @param fetcher The configuration for the fetcher that sent this email.
+     */
+    public static async sendFailure(error: String,
+                             fetcher: FetcherConfig) {
+        const transport = await this.init();
+
+        await transport.sendMail({
+            from: this.config.email.from,
+            to: this.config.email.failure_email,
+            subject: `${fetcher.friendly}: fetching failed`,
+            text: `An attempt to fetch ${
+                fetcher.friendly}'s invoices has failed.\n\nOutput:\n${
+                error}.`,
         });
     }
 }

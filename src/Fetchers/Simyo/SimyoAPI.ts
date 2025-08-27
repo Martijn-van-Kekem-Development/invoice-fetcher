@@ -72,7 +72,6 @@ export class SimyoAPI {
         });
 
         if (result.status !== 200) {
-            console.error("[ERROR] Login failure.", result.text());
             return false;
         }
 
@@ -96,7 +95,6 @@ export class SimyoAPI {
         });
 
         if (result.status !== 200) {
-            console.log("getInvoices() error", await result.json());
             return null;
         }
 
@@ -125,7 +123,6 @@ export class SimyoAPI {
         });
 
         if (result.status !== 200) {
-            console.log("getInvoiceBuffer() error", await result.json());
             return null;
         }
 
