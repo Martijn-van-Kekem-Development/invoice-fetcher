@@ -11,6 +11,18 @@ export abstract class Fetcher {
     protected config: FetcherConfig;
 
     /**
+     * The log messages.
+     * @protected
+     */
+    protected logMessages: string[] = [];
+
+    /**
+     * Whether this fetcher had an error during its run.
+     * @protected
+     */
+    protected hasError: boolean = false;
+
+    /**
      * Constructor for Fetcher.
      * @param config The supplied configuration.
      */
@@ -45,7 +57,7 @@ export abstract class Fetcher {
                 if (!invoice) continue; // Error, continue.
 
                 // Send e-mail with this document
-                await Email.send(invoice, this.config);
+                await Email.sendInvoice(invoice, this.config);
             }
 
             // Mark as fetched.
@@ -56,6 +68,11 @@ export abstract class Fetcher {
         // Log that we're finished.
         this.log("info", `Sent ${sentInvoices} invoices (${
             invoices.length - sentInvoices} duplicates skipped).`);
+
+        // Inform in case of any errors.
+        if (this.hasError) {
+            await Email.sendFailure(this.logMessages.join("\n"), this.config);
+        }
     }
 
     /**
@@ -64,7 +81,13 @@ export abstract class Fetcher {
      * @param message The message itself.
      */
     public log(type: "info" | "warn" | "error", ...message: string[]) {
-        console[type](`[Fetcher - ${this.config.id}] (${type}) ${message}`);
+        if (type === "error") {
+            this.hasError = true;
+        }
+
+        const msg = `[Fetcher - ${this.config.id}] (${type}) ${message}`;
+        console[type](msg);
+        this.logMessages.push(msg);
     }
 
     /**

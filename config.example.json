@@ -1,7 +1,8 @@
 {
   "email": {
     "from": "Name <email@address.com>",
-    "to": "Name <email@address.com>",
+    "invoice_email": "Name <email@address.com>",
+    "failure_email": "Name <email@address.com>",
     "smtp": {
       "port": 587,
       "host": "",
@@ -19,6 +20,15 @@
       "friendly": "Simyo",
       "phone": "0612345678",
       "password": ""
+    },
+    {
+      "id": "ovh_1",
+      "type": "ovh",
+      "friendly": "OVH",
+      "url": "https://eu.api.ovh.com/1.0",
+      "app_key": "",
+      "app_secret": "",
+      "consumer_key": ""
     }
   ]
 }
