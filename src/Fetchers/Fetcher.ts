@@ -70,7 +70,7 @@ export abstract class Fetcher {
             invoices.length - sentInvoices} duplicates skipped).`);
 
         // Inform in case of any errors.
-        if (this.hasError) {
+        if (this.hasError && !dryRun) {
             await Email.sendFailure(this.logMessages.join("\n"), this.config);
         }
     }
