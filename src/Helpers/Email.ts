@@ -33,7 +33,7 @@ export class Email {
 
         await transport.sendMail({
             from: this.config.email.from,
-            to: this.config.email.to,
+            to: this.config.email.invoice_email,
             attachments: [{
                 filename: `${invoice.id}.pdf`,
                 content: invoice.content

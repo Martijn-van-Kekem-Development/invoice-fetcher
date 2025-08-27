@@ -35,7 +35,8 @@ export interface Config {
 }
 
 export interface EmailConfig {
-    to: string,
+    invoice_email: string,
+    failure_email: string,
     from: string,
     smtp: TransportOptions
 }
